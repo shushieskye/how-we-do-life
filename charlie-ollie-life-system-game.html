@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Charlie + Ollie's Life System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF6EF;
+    --blush:#F7D9DE;
+    --lavender:#E3D9F6;
+    --lilac:#9B7FC7;
+    --lilac-dark:#7C5FAE;
+    --plum:#3E2E52;
+    --plum-soft:#6E5C86;
+    --gold:#F3B94D;
+    --white:#FFFFFF;
+    --line:#EFE4F4;
+    --shadow: 0 8px 24px rgba(123, 94, 168, 0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: linear-gradient(180deg, var(--cream) 0%, #FDF9F4 100%);
+    font-family:'Quicksand', sans-serif;
+    color:var(--plum);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    margin:0;
+  }
+  button{font-family:inherit;}
+  ::selection{background:var(--lavender);}
+
+  .sky{ position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
+  .sky span{ position:absolute; opacity:0.35; font-size:22px; animation: float 14s ease-in-out infinite; }
+  @keyframes float{ 0%,100%{ transform:translateY(0px) rotate(0deg); } 50%{ transform:translateY(-18px) rotate(8deg); } }
+
+  .app{ max-width:720px; margin:0 auto; padding:20px 18px 80px; }
+
+  .switcher{ display:flex; gap:10px; justify-content:center; margin-bottom:22px; }
+  .switcher button{
+    border:2px solid var(--line); background:var(--white); padding:10px 20px; border-radius:999px;
+    font-family:'Fredoka',sans-serif; font-size:15px; color:var(--plum-soft); cursor:pointer; transition: all .2s ease;
+  }
+  .switcher button.active{ background:var(--lilac); border-color:var(--lilac); color:white; box-shadow: var(--shadow); }
+
+  .brand{ text-align:center; font-size:14px; letter-spacing:.02em; color:var(--plum-soft); margin-bottom:6px; }
+
+  .greeting{ text-align:center; margin-bottom:22px; }
+  .greeting h1{ font-size:28px; color:var(--plum); }
+  .greeting .sub{ color:var(--plum-soft); margin-top:4px; font-size:15px; }
+
+  .hero-card{
+    background: linear-gradient(135deg, var(--lilac) 0%, var(--lilac-dark) 100%);
+    border-radius:28px; padding:26px 24px; color:white; box-shadow: var(--shadow);
+    position:relative; overflow:hidden; margin-bottom:16px;
+  }
+  .hero-card::after{ content:"✦"; position:absolute; top:14px; right:20px; font-size:20px; opacity:.5; }
+  .hero-top{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px; }
+  .hero-label{ font-size:13px; opacity:.85; }
+  .hero-score{ font-family:'Fredoka',sans-serif; font-size:52px; line-height:1; }
+  .hero-score span{font-size:22px; opacity:.75;}
+  .progress-track{ background: rgba(255,255,255,0.28); border-radius:999px; height:12px; overflow:hidden; }
+  .progress-fill{ background: var(--gold); height:100%; border-radius:999px; width:0%; transition: width .5s cubic-bezier(.4,1.4,.6,1); }
+  .hero-meta{ display:flex; justify-content:space-between; margin-top:12px; font-size:13px; opacity:.9; }
+
+  .beat-yourself{
+    background:var(--white); border-radius:20px; border:2px dashed var(--lilac);
+    padding:16px 18px; text-align:center; margin-bottom:16px;
+  }
+  .beat-yourself .headline{ font-family:'Fredoka',sans-serif; font-size:16px; color:var(--lilac-dark); margin-bottom:2px; }
+  .beat-yourself .detail{ font-size:14px; color:var(--plum-soft); }
+
+  .screens-banner{
+    background: linear-gradient(135deg, var(--gold), #F7CE7A);
+    border-radius:20px; padding:16px 18px; text-align:center; margin-bottom:16px; color:#5C4110;
+  }
+  .screens-banner .headline{ font-family:'Fredoka',sans-serif; font-size:16px; margin-bottom:2px; }
+  .screens-banner .detail{ font-size:13.5px; opacity:.9; margin-bottom:8px; }
+  .screens-banner button{
+    background:white; border:none; color:var(--lilac-dark); font-family:'Fredoka',sans-serif;
+    font-size:13.5px; padding:8px 16px; border-radius:12px; cursor:pointer;
+  }
+
+  .stats-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:22px; }
+  .stat-pill{ background:var(--white); border-radius:18px; padding:14px 10px; text-align:center; border:1px solid var(--line); }
+  .stat-pill .icon{font-size:20px;}
+  .stat-pill .num{ font-family:'Fredoka',sans-serif; font-size:20px; margin-top:2px; }
+  .stat-pill .lbl{ font-size:11.5px; color:var(--plum-soft); margin-top:1px; }
+
+  .tabs{ display:flex; gap:8px; margin-bottom:18px; }
+  .tabs button{
+    flex:1; border:2px solid var(--line); background:var(--white); padding:10px 0; border-radius:14px;
+    font-family:'Fredoka',sans-serif; font-size:14px; color:var(--plum-soft); cursor:pointer;
+  }
+  .tabs button.active{ background:var(--plum); border-color:var(--plum); color:white; }
+
+  .section-card{ background:var(--white); border-radius:22px; padding:18px 18px 8px; margin-bottom:16px; border:1px solid var(--line); }
+  .section-card .section-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .section-card .section-head h3{ font-size:17px; }
+  .section-card .section-head .count{ font-size:13px; color:var(--plum-soft); background:var(--cream); padding:4px 10px; border-radius:999px; }
+  .section-card.done .section-head .count{ background: #E5F4E3; color:#3C7A3E; }
+
+  .task{ display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--line); cursor:pointer; user-select:none; }
+  .task:last-child{border-bottom:none;}
+  .checkbox{
+    width:26px;height:26px; border-radius:9px; border:2px solid var(--lilac); flex-shrink:0;
+    display:flex;align-items:center;justify-content:center; transition: all .15s ease; font-size:14px; color:white;
+  }
+  .task.checked .checkbox{ background:var(--lilac); }
+  .task-label{ flex:1; font-size:15px; transition: color .15s ease; }
+  .task.checked .task-label{ color:var(--plum-soft); text-decoration: line-through; text-decoration-color: var(--lilac); }
+  .why-btn{ background:none; border:none; font-size:12.5px; color:var(--lilac-dark); text-decoration:underline; cursor:pointer; padding:2px 4px; flex-shrink:0; }
+  .point-pop{ position:relative; }
+  .pop{
+    position:absolute; right:6px; top:-4px; font-family:'Fredoka',sans-serif; color:var(--gold); font-size:14px;
+    opacity:0; animation: pop .7s ease forwards; pointer-events:none;
+  }
+  @keyframes pop{ 0%{ opacity:0; transform:translateY(4px) scale(.8); } 30%{ opacity:1; transform:translateY(-6px) scale(1.1); } 100%{ opacity:0; transform:translateY(-22px) scale(1); } }
+  .why-box{ font-size:13px; background:var(--lavender); color:var(--plum); border-radius:12px; padding:8px 12px; margin:0 4px 10px; }
+  .mini-celebrate{ text-align:center; font-family:'Fredoka',sans-serif; color:#3C7A3E; font-size:14px; padding:8px 0 4px; }
+
+  .explore-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .explore-card{
+    background:var(--white); border:1px solid var(--line); border-radius:20px; padding:16px;
+    cursor:pointer; text-align:left; transition: transform .15s ease;
+  }
+  .explore-card:active{ transform: scale(.97); }
+  .explore-card .icon{ font-size:26px; }
+  .explore-card h4{ font-family:'Fredoka',sans-serif; font-size:15px; margin:8px 0 3px; }
+  .explore-card p{ font-size:12.5px; color:var(--plum-soft); margin:0; }
+
+  .modal-backdrop{ position:fixed; inset:0; background:rgba(62,46,82,0.35); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
+  .modal{
+    background:var(--cream); width:100%; max-width:720px; border-radius:26px 26px 0 0; padding:22px 20px 28px;
+    max-height:85vh; overflow-y:auto; animation: slideup .25s ease;
+  }
+  @keyframes slideup{ from{ transform:translateY(30px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+  .modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .modal-head h2{ font-size:19px; }
+  .close-btn{ border:none; background:var(--white); width:32px;height:32px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--plum-soft); }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:13px; color:var(--plum-soft); margin-bottom:4px; }
+  .field textarea, .field input[type=text]{
+    width:100%; border:2px solid var(--line); border-radius:12px; padding:10px 12px;
+    font-family:'Quicksand',sans-serif; font-size:14px; resize:vertical; background:white;
+  }
+  .primary-btn{
+    background:var(--lilac); color:white; border:none; padding:12px 20px; border-radius:14px;
+    font-family:'Fredoka',sans-serif; font-size:15px; cursor:pointer; width:100%;
+  }
+  .secondary-btn{
+    background:white; border:2px solid var(--line); color:var(--plum); padding:12px 20px; border-radius:14px;
+    font-family:'Fredoka',sans-serif; font-size:15px; cursor:pointer; width:100%;
+  }
+
+  .big5-list{ display:flex; flex-direction:column; gap:10px; }
+  .big5-item{ background:white; border-radius:16px; padding:14px; border:1px solid var(--line); display:flex; gap:12px; align-items:flex-start; }
+  .big5-item .icon{ font-size:22px; }
+  .big5-item h4{ font-family:'Fredoka',sans-serif; font-size:15px; margin:0 0 2px; }
+  .big5-item p{ font-size:13px; color:var(--plum-soft); margin:0; }
+
+  .mini-big{
+    text-align:center; font-family:'Fredoka',sans-serif; font-size:16px; color:white;
+    background:linear-gradient(135deg, var(--lilac), var(--lilac-dark)); border-radius:14px; padding:14px 16px; margin:14px 0; line-height:1.4;
+  }
+  .mini-note{ text-align:center; color:var(--plum-soft); font-size:13px; font-style:italic; margin-top:8px; line-height:1.5; }
+
+  .stc-stage{ text-align:center; padding:20px 10px; }
+  .stc-stage .big-icon{ font-size:44px; }
+  .stc-stage h3{ font-size:22px; margin:10px 0 4px; }
+  .stc-stage p{ color:var(--plum-soft); font-size:15px; }
+  .stc-dots{ display:flex; justify-content:center; gap:6px; margin-top:16px; }
+  .stc-dots span{ width:8px; height:8px; border-radius:50%; background:var(--line); }
+  .stc-dots span.active{ background:var(--lilac); }
+
+  .ach-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .ach{ text-align:center; padding:12px 6px; border-radius:16px; border:1px solid var(--line); background:white; }
+  .ach.locked{ opacity:.35; }
+  .ach .icon{ font-size:24px; }
+  .ach .name{ font-size:11px; margin-top:4px; color:var(--plum-soft); font-family:'Fredoka',sans-serif; }
+
+  .fam-row{ display:flex; align-items:center; gap:12px; padding:10px 0; }
+  .fam-avatar{
+    width:38px;height:38px;border-radius:50%; background:var(--lavender); display:flex;align-items:center;justify-content:center;
+    font-family:'Fredoka',sans-serif; color:var(--lilac-dark); flex-shrink:0;
+  }
+  .fam-name{ font-size:14px; font-weight:600; flex:1; }
+  .fam-score{ font-family:'Fredoka',sans-serif; color:var(--gold); font-size:16px; }
+
+  .hist-row{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .hist-day{ width:38px; font-size:12px; color:var(--plum-soft); flex-shrink:0; }
+  .hist-bar-track{ flex:1; background:var(--cream); border-radius:999px; height:14px; overflow:hidden; }
+  .hist-bar-fill{ background: var(--lilac); height:100%; border-radius:999px; }
+  .hist-score{ width:34px; text-align:right; font-size:12.5px; color:var(--plum-soft); flex-shrink:0; }
+
+  .growth-cat{ display:inline-block; font-size:12px; padding:4px 10px; border-radius:999px; background:var(--lavender); color:var(--lilac-dark); margin:3px 4px 3px 0; cursor:pointer; }
+  .growth-cat.active{ background:var(--lilac); color:white; }
+  .growth-entry{ background:white; border:1px solid var(--line); border-radius:14px; padding:10px 12px; margin-bottom:8px; font-size:14px; }
+  .growth-entry .meta{ font-size:11px; color:var(--plum-soft); margin-top:3px; }
+
+  .week-row{ display:flex; gap:12px; align-items:flex-start; background:white; border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:8px; }
+  .week-row .icon{ font-size:20px; }
+  .week-row h4{ font-family:'Fredoka',sans-serif; font-size:14px; margin:0 0 2px; }
+  .week-row p{ font-size:12.5px; color:var(--plum-soft); margin:0; }
+
+  .footer-note{ text-align:center; color:var(--plum-soft); font-size:13px; margin-top:26px; line-height:1.5; }
+
+  @media (max-width:420px){ .hero-score{ font-size:44px; } }
+</style>
+</head>
+<body>
+
+<div class="sky">
+  <span style="top:6%;left:8%;">✦</span>
+  <span style="top:14%;left:80%;animation-delay:2s;">☁️</span>
+  <span style="top:40%;left:3%;animation-delay:4s;">✧</span>
+  <span style="top:70%;left:88%;animation-delay:1s;">🌸</span>
+  <span style="top:85%;left:15%;animation-delay:3s;">✦</span>
+  <span style="top:22%;left:45%;animation-delay:5s;">☁️</span>
+</div>
+
+<div class="app" id="app">Loading...</div>
+
+<script>
+/* ============================================================
+   CHARLIE + OLLIE'S LIFE SYSTEM — the game
+   Merges every original poster into one scored, tabbed app.
+   ============================================================ */
+
+const CHILDREN = [
+  { key: "Charlie", age: 11 },
+  { key: "Ollie", age: 9 }
+];
+
+/* ---- Daily missions (checkable, scored) ---- */
+const TASKS = {
+  morning: {
+    title: "Morning mission", icon: "☀️",
+    items: [
+      { id:"m1", label:"Get dressed", why:"Future-you isn't rushing in five minutes." },
+      { id:"m2", label:"Wash and brush teeth", why:"Two minutes now saves a trip to the dentist later." },
+      { id:"m3", label:"Do your hair", why:"You feel more ready when you look ready." },
+      { id:"m4", label:"Eat breakfast", why:"Your brain runs on fuel, not fumes." },
+      { id:"m5", label:"Pack school bag", why:"Future-you will thank you." },
+      { id:"m6", label:"Fill water bottle", why:"A tired brain is often just a thirsty one." },
+      { id:"m7", label:"Shoes on", why:"One less thing to do at the door." },
+      { id:"m8", label:"STOP · THINK · CHECK — everything I need?", why:"The first job isn't always the perfect one — just deal with what matters most first." }
+    ]
+  },
+  body: {
+    title: "Look after my body", icon: "🍎",
+    items: [
+      { id:"b1", label:"Eat something today", why:"My body is my responsibility." },
+      { id:"b2", label:"Drink water", why:"Listen to your body — no guilt, no punishment, just care." },
+      { id:"b3", label:"Move — play, sport or dance", why:"Moving is part of looking after yourself, not a chore." },
+      { id:"b4", label:"Rest when I need to", why:"Rest isn't lazy — it's maintenance." },
+      { id:"b5", label:"Notice hunger and fullness", why:"Your body tells you things — it's worth listening." },
+      { id:"b6", label:"Ask myself: how do I feel today?", why:"Checking in with yourself is a life skill too." }
+    ]
+  },
+  home: {
+    title: "Look after our home", icon: "🧹",
+    items: [
+      { id:"h1", label:"Put my things back", why:"If you see it, don't walk past it." },
+      { id:"h2", label:"Clear my dishes", why:"A tidy space is a calmer space." },
+      { id:"h3", label:"Help with a chore, even if not asked", why:"A house runs on everyone pitching in, not just Mum." },
+      { id:"h4", label:"Finish something I started", why:"Starting is easy — finishing is the skill." },
+      { id:"h5", label:"Do something kind for someone", why:"Kindness is a habit, and habits need practice." }
+    ]
+  },
+  afterschool: {
+    title: "Before I leave school", icon: "🎒",
+    items: [
+      { id:"a1", label:"Homework", why:"What do I need tonight?" },
+      { id:"a2", label:"Books", why:"Check before you go, not after." },
+      { id:"a3", label:"Pencil case", why:"One less thing to remember tomorrow." },
+      { id:"a4", label:"Kit / equipment", why:"Sport kit, instrument — whatever today needs." },
+      { id:"a5", label:"Water bottle", why:"Easy to forget, annoying to miss." },
+      { id:"a6", label:"Snack", why:"Future-you on the walk home will be glad." }
+    ]
+  },
+  night: {
+    title: "Night-before mission", icon: "🌙",
+    items: [
+      { id:"e1", label:"Homework or reading done", why:"Little and often beats last-minute panic." },
+      { id:"e2", label:"Tidy your room", why:"Tomorrow-you walks into a calmer room." },
+      { id:"e3", label:"Clothes ready for tomorrow", why:"One less decision in the morning rush." },
+      { id:"e4", label:"Pack your bag for tomorrow", why:"Morning-you will move twice as fast." },
+      { id:"e5", label:"Get washed and into pyjamas", why:"Your body sleeps better when it's ready to." },
+      { id:"e6", label:"Alarm set", why:"Tomorrow-you needs a wake-up call, not a scramble." },
+      { id:"e7", label:"One good thing about today", why:"Noticing good things trains your brain to find more of them." },
+      { id:"e8", label:"Lights out on time", why:"Sleep is when your brain does its tidying up." }
+    ]
+  }
+};
+
+const ALL_ITEMS = Object.values(TASKS).flatMap(s => s.items);
+const TOTAL_TASKS = ALL_ITEMS.length;
+
+const ACHIEVEMENTS = [
+  { id:"first_step", icon:"🌱", name:"First step", desc:"Complete your first task." },
+  { id:"morning_ready", icon:"☀️", name:"Morning ready", desc:"Complete your whole morning mission." },
+  { id:"body_care", icon:"🍎", name:"Body care", desc:"Complete your look-after-my-body mission." },
+  { id:"home_hero", icon:"🧹", name:"Home hero", desc:"Complete all home responsibilities." },
+  { id:"school_ready", icon:"🎒", name:"Packed & ready", desc:"Complete your before-I-leave-school check." },
+  { id:"night_owl", icon:"🌙", name:"All wrapped up", desc:"Complete your whole night mission." },
+  { id:"kindness_counts", icon:"💜", name:"Kindness counts", desc:"Do something kind for someone." },
+  { id:"think_first", icon:"🧠", name:"Think first", desc:"Use Stop · Think · Check." },
+  { id:"personal_best", icon:"🏆", name:"Personal best", desc:"Beat your previous best score." },
+  { id:"streak_7", icon:"🔥", name:"Seven-day streak", desc:"Check in seven days in a row." },
+  { id:"growing", icon:"🌟", name:"Growing every day", desc:"Log five days in your history." },
+  { id:"full_house", icon:"🎉", name:"Full house", desc:"Complete every mission in one day." }
+];
+
+const GROWTH_CATS = [
+  { id:"learned", icon:"🧠", label:"Something I learned" },
+  { id:"better", icon:"💪", label:"Something I got better at" },
+  { id:"kind", icon:"💜", label:"Something kind I did" },
+  { id:"hard", icon:"🌱", label:"Something difficult I handled" },
+  { id:"proud", icon:"⭐", label:"Something I'm proud of" }
+];
+
+const LEVELS = [
+  { min:0,  label:"Getting started", icon:"🌱" },
+  { min:8,  label:"Growing",         icon:"🌿" },
+  { min:18, label:"Thriving",        icon:"🌸" },
+  { min:28, label:"Brilliant day",   icon:"⭐" }
+];
+
+let state = { currentChild: "Charlie", currentTab: "today", data: {} };
+
+function todayStr(){ const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function dayLabel(dateStr){ const d = new Date(dateStr+"T00:00:00"); return d.toLocaleDateString(undefined,{weekday:'short'}); }
+function greetingWord(){
+  const h = new Date().getHours();
+  if(h < 12) return {text:"Good morning", icon:"☀️"};
+  if(h < 17) return {text:"Good afternoon", icon:"🌤️"};
+  return {text:"Good evening", icon:"🌙"};
+}
+function defaultChildData(){
+  return { history: [], personalBest: 0, streak: 0, lastStreakDate: null, achievements: [], usedSTC: false, growth: [], today: { date: todayStr(), completed: {} } };
+}
+
+async function loadChild(name){
+  let raw = null;
+  try{
+    const res = await window.storage.get("lifesystem2:"+name, true);
+    raw = res ? JSON.parse(res.value) : null;
+  }catch(e){ raw = null; }
+  let d = raw || defaultChildData();
+
+  if(d.today.date !== todayStr()){
+    const prevScore = Object.values(d.today.completed).filter(Boolean).length;
+    const prevDate = d.today.date;
+    if(prevDate){
+      const alreadyLogged = d.history.some(h => h.date === prevDate);
+      if(!alreadyLogged){
+        d.history.push({ date: prevDate, score: prevScore, total: TOTAL_TASKS });
+        if(d.history.length > 30) d.history.shift();
+      }
+      if(prevScore > 0){
+        const yest = new Date(prevDate+"T00:00:00");
+        yest.setDate(yest.getDate()+1);
+        const expectedToday = yest.getFullYear()+"-"+String(yest.getMonth()+1).padStart(2,"0")+"-"+String(yest.getDate()).padStart(2,"0");
+        d.streak = (expectedToday === todayStr()) ? (d.streak||0) + 1 : 1;
+      } else {
+        d.streak = 0;
+      }
+      d.personalBest = Math.max(d.personalBest||0, prevScore);
+    }
+    d.today = { date: todayStr(), completed: {} };
+  }
+  return d;
+}
+
+async function saveChild(name, data){
+  try{ await window.storage.set("lifesystem2:"+name, JSON.stringify(data), true); }catch(e){ console.error("save failed", e); }
+}
+
+function yesterdayScore(d){ const y = d.history[d.history.length-1]; return y ? y.score : 0; }
+function todayScore(d){ return Object.values(d.today.completed).filter(Boolean).length; }
+function levelFor(score){ let cur = LEVELS[0]; for(const l of LEVELS){ if(score >= l.min) cur = l; } return cur; }
+function sectionDoneMap(d){
+  const map = {};
+  Object.entries(TASKS).forEach(([key, section])=>{ map[key] = section.items.every(i => d.today.completed[i.id]); });
+  return map;
+}
+
+function unlockAchievement(d, id){
+  if(!d.achievements.includes(id)){ d.achievements.push(id); return true; }
+  return false;
+}
+
+function checkAchievements(d, newlyUnlockedCallback){
+  const score = todayScore(d);
+  const done = sectionDoneMap(d);
+  const kindDone = !!d.today.completed["h5"];
+  const fullHouse = Object.values(done).every(Boolean);
+
+  const checks = [
+    [score > 0, "first_step"],
+    [done.morning, "morning_ready"],
+    [done.body, "body_care"],
+    [done.home, "home_hero"],
+    [done.afterschool, "school_ready"],
+    [done.night, "night_owl"],
+    [kindDone, "kindness_counts"],
+    [d.usedSTC, "think_first"],
+    [score > d.personalBest, "personal_best"],
+    [(d.streak||0) >= 7, "streak_7"],
+    [d.history.length >= 5, "growing"],
+    [fullHouse, "full_house"]
+  ];
+  checks.forEach(([cond, id]) => {
+    if(cond){
+      const isNew = unlockAchievement(d, id);
+      if(isNew && newlyUnlockedCallback) newlyUnlockedCallback(id);
+    }
+  });
+}
+
+/* ---------------- Rendering ---------------- */
+
+const app = document.getElementById("app");
+
+async function init(){
+  for(const c of CHILDREN){ state.data[c.key] = await loadChild(c.key); }
+  render();
+}
+
+function currentData(){ return state.data[state.currentChild]; }
+
+function render(){
+  const d = currentData();
+  const score = todayScore(d);
+  const pct = Math.round((score/TOTAL_TASKS)*100);
+  const yScore = yesterdayScore(d);
+  const g = greetingWord();
+  const level = levelFor(score);
+  const diffFromYesterday = yScore - score;
+  const done = sectionDoneMap(d);
+  const fullHouse = Object.values(done).every(Boolean);
+
+  let beatMsg = "";
+  if(score > yScore && yScore >= 0 && score > 0){
+    beatMsg = `<div class="beat-yourself"><div class="headline">🎉 You beat yesterday!</div><div class="detail">Yesterday: ${yScore} · Today: ${score}</div></div>`;
+  } else if(diffFromYesterday > 0){
+    beatMsg = `<div class="beat-yourself"><div class="headline">🎯 Can you beat yourself?</div><div class="detail">You're ${diffFromYesterday} point${diffFromYesterday===1?'':'s'} away from yesterday's score.</div></div>`;
+  } else {
+    beatMsg = `<div class="beat-yourself"><div class="headline">${level.icon} ${level.label}</div><div class="detail">One step at a time — progress counts.</div></div>`;
+  }
+
+  const screensBanner = fullHouse ? `
+    <div class="screens-banner">
+      <div class="headline">🎉 Responsibilities done!</div>
+      <div class="detail">Screens, games or a dance break — you've earned it.</div>
+      <button id="readyBtn">Give me an idea</button>
+    </div>` : "";
+
+  app.innerHTML = `
+    <div class="brand">Charlie + Ollie's Life System 🌸</div>
+    <div class="switcher">
+      ${CHILDREN.map(c => `<button data-child="${c.key}" class="${state.currentChild===c.key?'active':''}">${c.key} · ${c.age}</button>`).join("")}
+    </div>
+
+    <div class="greeting">
+      <h1>${g.text}, ${state.currentChild} ${g.icon}</h1>
+      <div class="sub">Let's see how today's going.</div>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-top">
+        <div>
+          <div class="hero-label">Today's score</div>
+          <div class="hero-score">${score}<span> / ${TOTAL_TASKS}</span></div>
+        </div>
+        <div style="text-align:right;"><div class="hero-label">${pct}% complete</div></div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="mainProgress" style="width:${pct}%"></div></div>
+      <div class="hero-meta"><span>Yesterday: ${yScore}</span><span>Best: ${d.personalBest}</span></div>
+    </div>
+
+    ${beatMsg}
+    ${screensBanner}
+
+    <div class="stats-row">
+      <div class="stat-pill"><div class="icon">🏆</div><div class="num">${d.personalBest}</div><div class="lbl">Personal best</div></div>
+      <div class="stat-pill"><div class="icon">🔥</div><div class="num">${d.streak||0}</div><div class="lbl">Day streak</div></div>
+      <div class="stat-pill"><div class="icon">🌟</div><div class="num">${d.achievements.length}</div><div class="lbl">Achievements</div></div>
+    </div>
+
+    <div class="tabs">
+      <button data-tab="today" class="${state.currentTab==='today'?'active':''}">Today</button>
+      <button data-tab="explore" class="${state.currentTab==='explore'?'active':''}">Explore</button>
+    </div>
+
+    <div id="tabContent"></div>
+
+    <div class="footer-note">Can you be a little better than yesterday?<br>That's the whole game.<br><span style="font-size:11.5px;">Work hard. Play harder. Be kind. Keep learning. 🌱</span></div>
+  `;
+
+  document.querySelectorAll(".switcher button").forEach(btn=>{
+    btn.onclick = () => { state.currentChild = btn.dataset.child; render(); };
+  });
+  document.querySelectorAll(".tabs button").forEach(btn=>{
+    btn.onclick = () => { state.currentTab = btn.dataset.tab; render(); };
+  });
+  const readyBtn = document.getElementById("readyBtn");
+  if(readyBtn) readyBtn.onclick = () => openReady();
+
+  if(state.currentTab === "today") renderToday();
+  else renderExplore();
+}
+
+function renderSection(sectionKey){
+  const section = TASKS[sectionKey];
+  const d = currentData();
+  const doneCount = section.items.filter(i => d.today.completed[i.id]).length;
+  const isDone = doneCount === section.items.length;
+  return `
+    <div class="section-card ${isDone?'done':''}">
+      <div class="section-head">
+        <h3>${section.icon} ${section.title}</h3>
+        <div class="count">${doneCount} / ${section.items.length}</div>
+      </div>
+      ${section.items.map(item => `
+        <div class="task ${d.today.completed[item.id]?'checked':''}" data-id="${item.id}">
+          <div class="checkbox">${d.today.completed[item.id]?'✓':''}</div>
+          <div class="task-label point-pop">${item.label}</div>
+          <button class="why-btn" data-why="${item.id}">why?</button>
+        </div>
+        <div class="why-box" id="why-${item.id}" style="display:none;">${item.why}</div>
+      `).join("")}
+      ${isDone ? `<div class="mini-celebrate">✨ ${section.title} complete!</div>` : ""}
+    </div>
+  `;
+}
+
+function renderToday(){
+  const el = document.getElementById("tabContent");
+  el.innerHTML = Object.keys(TASKS).map(renderSection).join("");
+
+  el.querySelectorAll(".task").forEach(taskEl=>{
+    taskEl.onclick = (ev) => {
+      if(ev.target.classList.contains("why-btn")) return;
+      toggleTask(taskEl.dataset.id, taskEl);
+    };
+  });
+  el.querySelectorAll(".why-btn").forEach(btn=>{
+    btn.onclick = (ev) => {
+      ev.stopPropagation();
+      const box = document.getElementById("why-"+btn.dataset.why);
+      box.style.display = box.style.display === "none" ? "block" : "none";
+    };
+  });
+}
+
+async function toggleTask(id, taskEl){
+  const d = currentData();
+  const wasChecked = !!d.today.completed[id];
+  d.today.completed[id] = !wasChecked;
+
+  const prevBest = d.personalBest;
+  let unlocked = [];
+  checkAchievements(d, (aid)=> unlocked.push(aid));
+
+  await saveChild(state.currentChild, d);
+
+  if(!wasChecked){
+    const label = taskEl.querySelector(".task-label");
+    const pop = document.createElement("span");
+    pop.className = "pop";
+    pop.textContent = "+1";
+    label.appendChild(pop);
+    setTimeout(()=>pop.remove(), 700);
+  }
+
+  render();
+
+  if(unlocked.length){ setTimeout(()=> showAchievementToast(unlocked, prevBest), 350); }
+}
+
+function showAchievementToast(ids, prevBest){
+  const first = ACHIEVEMENTS.find(a=>a.id===ids[0]);
+  if(!first) return;
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.innerHTML = `
+    <div class="modal" style="text-align:center;">
+      <div style="font-size:44px;">${first.icon}</div>
+      <h2 style="margin-top:10px;">Achievement unlocked!</h2>
+      <p style="color:var(--plum-soft);">${first.name} — ${first.desc}</p>
+      <button class="primary-btn" style="margin-top:14px;">Nice!</button>
+    </div>
+  `;
+  backdrop.querySelector("button").onclick = () => backdrop.remove();
+  backdrop.onclick = (e) => { if(e.target===backdrop) backdrop.remove(); };
+  document.body.appendChild(backdrop);
+}
+
+/* ---------------- Explore tab ---------------- */
+
+function renderExplore(){
+  const el = document.getElementById("tabContent");
+  el.innerHTML = `
+    <div class="explore-grid">
+      <button class="explore-card" data-open="big5"><div class="icon">🌟</div><h4>How We Do Life</h4><p>The things that matter most.</p></button>
+      <button class="explore-card" data-open="stc"><div class="icon">🧠</div><h4>Stop · Think · Check</h4><p>A tool for tricky moments.</p></button>
+      <button class="explore-card" data-open="participation"><div class="icon">📚</div><h4>School = Participation</h4><p>Showing up matters most.</p></button>
+      <button class="explore-card" data-open="kindness"><div class="icon">❤️</div><h4>Kindness Is Strength</h4><p>Strong doesn't mean harsh.</p></button>
+      <button class="explore-card" data-open="mistake"><div class="icon">🦋</div><h4>Mistake → Lesson</h4><p>Turn a wobble into a win.</p></button>
+      <button class="explore-card" data-open="growth"><div class="icon">💜</div><h4>Look how I'm growing</h4><p>See your own progress.</p></button>
+      <button class="explore-card" data-open="bigone"><div class="icon">🧭</div><h4>The Big One</h4><p>Notice it. Own it. Try again.</p></button>
+      <button class="explore-card" data-open="ready"><div class="icon">💃</div><h4>Ready Means Ready!</h4><p>Ideas for an earned break.</p></button>
+      <button class="explore-card" data-open="ourweek"><div class="icon">🎉</div><h4>Our Week</h4><p>Our week at a glance.</p></button>
+      <button class="explore-card" data-open="history"><div class="icon">📈</div><h4>My progress</h4><p>Your last few days.</p></button>
+      <button class="explore-card" data-open="family"><div class="icon">🏡</div><h4>Family scoreboard</h4><p>Who's having a great day?</p></button>
+      <button class="explore-card" data-open="achievements" style="grid-column:span 2;"><div class="icon">🏆</div><h4>My achievements</h4><p>Everything you've unlocked so far.</p></button>
+    </div>
+  `;
+  el.querySelectorAll(".explore-card").forEach(card=>{
+    card.onclick = () => openModal(card.dataset.open);
+  });
+}
+
+function modalShell(innerHtml, title){
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.innerHTML = `<div class="modal"><div class="modal-head"><h2>${title}</h2><button class="close-btn">✕</button></div>${innerHtml}</div>`;
+  backdrop.querySelector(".close-btn").onclick = () => backdrop.remove();
+  backdrop.onclick = (e) => { if(e.target===backdrop) backdrop.remove(); };
+  document.body.appendChild(backdrop);
+  return backdrop;
+}
+
+function openModal(kind){
+  if(kind === "big5") return openBig5();
+  if(kind === "stc") return openStepper({
+    title:"Stop · Think · Check",
+    stages:[
+      { icon:"🛑", title:"Stop", body:"Don't panic. Pause for a second." },
+      { icon:"🧠", title:"Think", body:"What matters most right now?" },
+      { icon:"🔎", title:"Check", body:"Do I have what I need?" },
+      { icon:"▶️", title:"Act", body:"Choose your next step, and go." }
+    ],
+    onFinish: markSTCUsed
+  });
+  if(kind === "participation") return openParticipation();
+  if(kind === "kindness") return openKindness();
+  if(kind === "mistake") return openMistake();
+  if(kind === "growth") return openGrowth();
+  if(kind === "bigone") return openStepper({
+    title:"The Big One",
+    stages:[
+      { icon:"👀", title:"Notice it", body:"What actually happened?" },
+      { icon:"🙋", title:"Own it", body:"No blaming — just own your part." },
+      { icon:"🧠", title:"Learn from it", body:"What does this teach you?" },
+      { icon:"🔧", title:"Change what needs changing", body:"What will you do differently?" },
+      { icon:"🔁", title:"Try again", body:"That's how we grow. 🌱" }
+    ]
+  });
+  if(kind === "ready") return openReady();
+  if(kind === "ourweek") return openOurWeek();
+  if(kind === "history") return openHistory();
+  if(kind === "family") return openFamily();
+  if(kind === "achievements") return openAchievements();
+}
+
+function openBig5(){
+  const items = [
+    { icon:"💪", title:"Work hard", body:"Give real things your real effort." },
+    { icon:"🎉", title:"Play harder", body:"Rest and fun are not the reward for finishing — they're part of a good life." },
+    { icon:"💜", title:"Be kind", body:"Especially when it's hard. Especially to yourself." },
+    { icon:"📚", title:"Keep learning", body:"Every day, in and out of school." },
+    { icon:"🧠", title:"Take responsibility", body:"Look after yourself, others and your things." }
+  ];
+  modalShell(`<div class="big5-list">${items.map(i=>`<div class="big5-item"><div class="icon">${i.icon}</div><div><h4>${i.title}</h4><p>${i.body}</p></div></div>`).join("")}</div>`, "How We Do Life");
+}
+
+function openParticipation(){
+  const items = [
+    "I arrive prepared", "I listen", "I participate", "I ask questions",
+    "I ask for help when I need it", "I speak respectfully", "I try",
+    "I take responsibility for my work", "I notice what needs doing", "I keep going when something is difficult"
+  ];
+  modalShell(`
+    <p style="color:var(--plum-soft);font-size:13.5px;margin-top:-4px;">School isn't only about marks. It's about showing up and taking part.</p>
+    <div class="big5-list">${items.map(t=>`<div class="big5-item"><div class="icon">✓</div><div><p style="margin:0;">${t}</p></div></div>`).join("")}</div>
+    <div class="mini-big">PROGRESS &gt; PERFECTION</div>
+    <div class="mini-note">My job isn't to know everything. My job is to learn.</div>
+  `, "School = Participation");
+}
+
+function openKindness(){
+  const items = [
+    "Be kind to myself", "Be kind to my family", "Be kind to my friends", "Listen", "Help",
+    "Apologise when necessary", "Forgive", "Think about how my actions affect others"
+  ];
+  modalShell(`
+    <div class="big5-list">${items.map(t=>`<div class="big5-item"><div class="icon">💜</div><div><p style="margin:0;">${t}</p></div></div>`).join("")}</div>
+    <div class="mini-big">STRONG DOESN'T MEAN HARSH.<br>KIND DOESN'T MEAN HELPLESS.</div>
+  `, "Kindness Is Strength");
+}
+
+async function markSTCUsed(){
+  const d = currentData();
+  d.usedSTC = true;
+  let unlocked = [];
+  checkAchievements(d, (aid)=>unlocked.push(aid));
+  await saveChild(state.currentChild, d);
+  render();
+  if(unlocked.length) setTimeout(()=>showAchievementToast(unlocked), 200);
+}
+
+function openStepper({ title, stages, onFinish }){
+  let idx = 0;
+  const backdrop = modalShell(`<div id="stepBody"></div>`, title);
+  function draw(){
+    const s = stages[idx];
+    const body = backdrop.querySelector("#stepBody");
+    body.innerHTML = `
+      <div class="stc-stage">
+        <div class="big-icon">${s.icon}</div>
+        <h3>${s.title}</h3>
+        <p>${s.body}</p>
+        <div class="stc-dots">${stages.map((_,i)=>`<span class="${i===idx?'active':''}"></span>`).join("")}</div>
+      </div>
+      <button class="primary-btn" id="stepNext">${idx===stages.length-1?"All done":"Next"}</button>
+    `;
+    body.querySelector("#stepNext").onclick = async () => {
+      if(idx === stages.length-1){
+        backdrop.remove();
+        if(onFinish) await onFinish();
+      } else {
+        idx++; draw();
+      }
+    };
+  }
+  draw();
+}
+
+function openMistake(){
+  const backdrop = modalShell(`
+    <div class="field"><label>What happened?</label><textarea id="mWhat" rows="2"></textarea></div>
+    <div class="field"><label>What can you learn?</label><textarea id="mLearn" rows="2"></textarea></div>
+    <div class="field"><label>What will you do differently next time?</label><textarea id="mNext" rows="2"></textarea></div>
+    <button class="primary-btn" id="mSave">Unlock the lesson</button>
+    <div id="mResult"></div>
+    <div class="mini-note">Mistakes aren't the end. They're information.</div>
+  `, "Mistake → Lesson");
+  backdrop.querySelector("#mSave").onclick = async () => {
+    const what = backdrop.querySelector("#mWhat").value.trim();
+    const learn = backdrop.querySelector("#mLearn").value.trim();
+    const next = backdrop.querySelector("#mNext").value.trim();
+    if(!learn && !what) return;
+    const d = currentData();
+    d.growth.push({ cat:"hard", text: learn || what, date: todayStr() });
+    if(d.growth.length > 60) d.growth.shift();
+    await saveChild(state.currentChild, d);
+    backdrop.querySelector("#mResult").innerHTML = `<div class="beat-yourself" style="margin-top:12px;"><div class="headline">🌱 Lesson unlocked</div><div class="detail">${next || "Every mistake is just information."}</div></div>`;
+  };
+}
+
+function openGrowth(){
+  const d = currentData();
+  const entries = [...d.growth].reverse();
+  let activeCat = null;
+  const backdrop = modalShell(`
+    <p style="color:var(--plum-soft);font-size:13px;margin-top:-4px;">Growth doesn't happen all at once — look how far you've come. Works for "I used to... now I..." moments too.</p>
+    <div id="catRow"></div>
+    <div class="field" style="margin-top:10px;"><textarea id="growthText" rows="2" placeholder="Write a little about it..."></textarea></div>
+    <button class="primary-btn" id="growthSave">Add to my growth</button>
+    <h3 style="margin-top:18px;font-size:15px;">Past entries</h3>
+    <div id="growthList">
+      ${entries.length ? entries.map(e=>{
+        const cat = GROWTH_CATS.find(c=>c.id===e.cat) || {icon:"🌟",label:"Note"};
+        return `<div class="growth-entry">${cat.icon} ${e.text}<div class="meta">${cat.label} · ${e.date}</div></div>`;
+      }).join("") : `<p style="color:var(--plum-soft);font-size:13px;">Nothing here yet — your growth will show up as you go.</p>`}
+    </div>
+  `, "Look how I'm growing");
+
+  const catRow = backdrop.querySelector("#catRow");
+  catRow.innerHTML = GROWTH_CATS.map(c=>`<span class="growth-cat" data-cat="${c.id}">${c.icon} ${c.label}</span>`).join("");
+  catRow.querySelectorAll(".growth-cat").forEach(el=>{
+    el.onclick = () => {
+      catRow.querySelectorAll(".growth-cat").forEach(x=>x.classList.remove("active"));
+      el.classList.add("active");
+      activeCat = el.dataset.cat;
+    };
+  });
+
+  backdrop.querySelector("#growthSave").onclick = async () => {
+    const text = backdrop.querySelector("#growthText").value.trim();
+    if(!text || !activeCat) return;
+    const dd = currentData();
+    dd.growth.push({ cat: activeCat, text, date: todayStr() });
+    if(dd.growth.length > 60) dd.growth.shift();
+    await saveChild(state.currentChild, dd);
+    backdrop.remove();
+    openGrowth();
+  };
+}
+
+function openReady(){
+  const items = [
+    ["🧘","Yoga"], ["💪","Squats"], ["⭐","Jumping jacks"], ["💃","Dance"],
+    ["🤸","Stretching"], ["🏃","2-minute workout"], ["🎵","Silly song"], ["🤪","Make up our own"]
+  ];
+  modalShell(`
+    <p style="color:var(--plum-soft);font-size:13.5px;margin-top:-4px;">Responsibilities done = fun time! Here's a few ideas for an earned break.</p>
+    <div class="big5-list">${items.map(([icon,t])=>`<div class="big5-item"><div class="icon">${icon}</div><div><p style="margin:0;">${t}</p></div></div>`).join("")}</div>
+    <div class="mini-big">MORE ORGANISED = MORE TIME TO PLAY!</div>
+  `, "Ready Means Ready!");
+}
+
+function openOurWeek(){
+  const days = [
+    ["📚","MONDAY","Back to business","School + responsibilities"],
+    ["🌱","TUESDAY","Keep going","School + responsibilities"],
+    ["🌈","WEDNESDAY","Midweek fun","Half-day school → adventure afternoon"],
+    ["🧠","THURSDAY","Back to learning","Knowledge, curiosity, wisdom + school"],
+    ["🎉","FRIDAY","It's Friday!","School → home → weekend starts!"],
+    ["🥳","SATURDAY","Play harder","Friends, family, adventures, games"],
+    ["🔄","SUNDAY","Reset","Home + room + school + bags + clothes + snacks + early-ish night"]
+  ];
+  modalShell(`
+    <div>${days.map(([icon,day,title,desc])=>`<div class="week-row"><div class="icon">${icon}</div><div><h4>${day} — ${title}</h4><p>${desc}</p></div></div>`).join("")}</div>
+    <div class="mini-note">Work hard. Play harder.</div>
+  `, "Our Week");
+}
+
+function openHistory(){
+  const d = currentData();
+  const recent = [...d.history].slice(-7);
+  const withToday = [...recent, { date: todayStr(), score: todayScore(d), total: TOTAL_TASKS }];
+  const max = Math.max(TOTAL_TASKS, ...withToday.map(h=>h.score));
+  modalShell(`
+    <div>
+      ${withToday.map(h=>{
+        const pct = Math.round((h.score/max)*100);
+        const isBest = h.score === d.personalBest && h.score > 0;
+        return `<div class="hist-row">
+          <div class="hist-day">${dayLabel(h.date)}</div>
+          <div class="hist-bar-track"><div class="hist-bar-fill" style="width:${pct}%"></div></div>
+          <div class="hist-score">${h.score}${isBest?' 🏆':''}</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <p style="font-size:13px;color:var(--plum-soft);margin-top:14px;">Personal best: ${d.personalBest} · Current streak: ${d.streak||0} days</p>
+  `, "My progress");
+}
+
+async function openFamily(){
+  const rows = await Promise.all(CHILDREN.map(async c=>{
+    const cd = state.data[c.key];
+    return { name: c.key, score: todayScore(cd) };
+  }));
+  modalShell(`
+    <p style="color:var(--plum-soft);font-size:14px;margin-top:-4px;">Who's having a great day?</p>
+    ${rows.map(r=>`
+      <div class="fam-row">
+        <div class="fam-avatar">${r.name[0]}</div>
+        <div class="fam-name">${r.name}</div>
+        <div class="fam-score">${r.score} ⭐</div>
+      </div>
+    `).join("")}
+  `, "Family scoreboard");
+}
+
+function openAchievements(){
+  const d = currentData();
+  modalShell(`
+    <div class="ach-grid">
+      ${ACHIEVEMENTS.map(a=>{
+        const has = d.achievements.includes(a.id);
+        return `<div class="ach ${has?'':'locked'}"><div class="icon">${a.icon}</div><div class="name">${a.name}</div></div>`;
+      }).join("")}
+    </div>
+  `, "My achievements");
+}
+
+init();
+</script>
+</body>
+</html>
